@@ -18,6 +18,19 @@ const App = () => {
       })
   }, [])
 
+  const updatePersons = (personObject) => {
+    const objID = persons.find(person => {
+      if (person.name === personObject.name) {
+        return person.id
+      }
+    })
+    phoneBook
+      .update(objID.id, personObject)
+      .then(response => {
+        setPersons(persons.map(person => person.id !== objID.id ? person : response))
+      })
+  }
+
   const addPersons = (event) => {
     event.preventDefault()
     const personObject = {
@@ -25,9 +38,14 @@ const App = () => {
       number: newNumber
     }
     if (persons.map(person => person.name).includes(personObject.name)) {
-      setNewName('')
-      setNewNumber('')
-      return alert(`${personObject.name} is already added to phonebook`)
+      if (!window.confirm(`${personObject.name} is already added to phonebook, 
+      replace the old number with a new one?`)) {
+        setNewName('')
+        setNewNumber('')
+        return
+      }
+      updatePersons(personObject)
+      return 
     }
 
     phoneBook
@@ -50,6 +68,21 @@ const App = () => {
   const handleFilterChange = (event) => {
     setNewFilter(event.target.value)
   }
+  
+  const handlePersonDeletion = (person) => {
+    if (!window.confirm(`Delete ${person.name}?`)) {
+      return 
+    }
+    phoneBook
+      .deletion(person.id)
+      .then(() => {
+        phoneBook
+          .getAll()
+          .then(response => {
+          setPersons(response)
+      })
+    })
+    }
 
   return (
     <div>
@@ -60,7 +93,7 @@ const App = () => {
       value={newName} onChange={handlePersonChange}
       value2={newNumber} onChange2={handleNumberChange}/>
       <h2>Numbers</h2>
-      <PersonList persons={persons} newFilter={newFilter}/>
+      <PersonList persons={persons} newFilter={newFilter} buttonClick={handlePersonDeletion}/>
     </div>
   )
 }
