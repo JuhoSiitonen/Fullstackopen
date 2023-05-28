@@ -3,12 +3,16 @@ import Filter from './components/Filter'
 import PersonList from './components/PersonList'
 import FormElement from './components/FormElement'
 import phoneBook from './services/numbers'
+import NotificationMessage from './components/NotificationMessage'
+import ErrorMessage from './components/ErrorMessage'
 
 const App = () => {
   const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [newFilter, setNewFilter] = useState('')
+  const [newNotification, setNewNotification] = useState('')
+  const [errorMessage, setErrorMessage] = useState('')
 
   useEffect(() => {
     phoneBook
@@ -28,6 +32,19 @@ const App = () => {
       .update(objID.id, personObject)
       .then(response => {
         setPersons(persons.map(person => person.id !== objID.id ? person : response))
+        setNewNotification(`${objID.name} updated in phonebook!`)
+        setNewName('')
+        setNewNumber('')
+        setTimeout(() => {
+          setNewNotification('')
+        }, 5000)
+      })
+      .catch(error => {
+        setErrorMessage(`Information on ${personObject.name} is already removed from server`)
+        setTimeout(() => {
+          setErrorMessage('')
+        }, 5000)
+        setPersons(persons.filter(n => n.id !== objID.id))
       })
   }
 
@@ -54,6 +71,10 @@ const App = () => {
         setPersons(persons.concat(response))
         setNewName('')
         setNewNumber('')
+        setNewNotification(`${personObject.name} added to phonebook!`)
+        setTimeout(() => {
+          setNewNotification('')
+        }, 5000)
       })
   }
 
@@ -80,13 +101,25 @@ const App = () => {
           .getAll()
           .then(response => {
           setPersons(response)
+          setNewNotification(`${person.name} deleted from phonebook!`)
+          setTimeout(() => {
+          setNewNotification('')
+        }, 5000)
       })
+    })
+      .catch(error => {
+        setErrorMessage(`Person ${person.name} was already removed`)
+        setTimeout(() => {
+        setErrorMessage('')
+      }, 5000)
     })
     }
 
   return (
     <div>
       <h2>Phonebook</h2>
+      <NotificationMessage message={newNotification}/>
+      <ErrorMessage message={errorMessage}/>
       <Filter value={newFilter} onChange={handleFilterChange}/>
       <h2>Add a new</h2>
       <FormElement onSubmit={addPersons} 
