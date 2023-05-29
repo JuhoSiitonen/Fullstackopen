@@ -19,7 +19,6 @@ const SearchResults = ({selectCountry,  searchResults}) => {
       <p>Too many matches, specify another filter</p>
     )
     }else if (results.length === 1) {
-      console.log('1')
       return (
         <div>
           <SingleCountry country={results[0]}/>
