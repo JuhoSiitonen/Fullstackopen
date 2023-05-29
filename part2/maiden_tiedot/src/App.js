@@ -7,6 +7,7 @@ import countryinfo from './services/countryinfo'
 const App = () => {
   const [newFilter, setNewFilter] = useState('')
   const [allCountries, setAllCountries] = useState([])
+  const [searchResults, setSearchResults] = useState([])
 
   useEffect(() => {
     countryinfo
@@ -18,12 +19,23 @@ const App = () => {
 
   const handleFilterChange = (event) => {
     setNewFilter(event.target.value)
+    if (event.target.value !== '') {
+      const checkFilter = (country) => {
+        return country.name.common.toLowerCase().includes(event.target.value.toLowerCase())
+      }
+      setSearchResults(allCountries.filter(checkFilter))
+    }
+  }
+
+  const selectCountry = (country) => {
+    setSearchResults([country])
   }
 
   return (
     <div>
       <CountrySearch value={newFilter} onChange={handleFilterChange}/>
-      <SearchResults allCountries={allCountries} newFilter={newFilter}/>
+      <SearchResults allCountries={allCountries} newFilter={newFilter}
+      selectCountry={selectCountry} searchResults={searchResults}/>
     </div>
   )
 }
